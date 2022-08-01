@@ -97,7 +97,7 @@ def post_receitas():
         return jsonify(receita_schema.dump(receita))
 
 
-@app.route('/api/receita/<int:id>', methods=['GET'])
+@app.route('/api/receitas/<int:id>', methods=['GET'])
 def get_receita(id):
     receita = Receitas.query.get_or_404(id)
     if receita:
@@ -108,7 +108,7 @@ def get_receita(id):
         }), 404
 
 
-@app.route('/api/receita/<int:id>', methods=['PUT'])
+@app.route('/api/receitas/<int:id>', methods=['PUT'])
 def put_receita(id):
     receita = Receitas.query.get_or_404(id)
     if receita:
@@ -138,7 +138,7 @@ def put_receita(id):
         }), 404
 
 
-@app.route('/api/receita/<int:id>', methods=['DELETE'])
+@app.route('/api/receitas/<int:id>', methods=['DELETE'])
 def del_receita(id):
     receita = Receitas.query.get_or_404(id)
     if receita:
@@ -152,6 +152,107 @@ def del_receita(id):
         return jsonify({
             'Mensagem': MSG_NOT_FOUND   
         }), 404
+
+
+# Rotas de despesas
+@app.route('/api/despesas', methods=['GET'])
+def get_despesas():
+    todas_receitas = Despesas.query.all()
+    if todas_receitas:
+        return jsonify(receitas_schema.dump(todas_receitas))
+    else:
+        return jsonify({
+            'Mensagem': MSG_NOT_FOUND   
+        })
+
+
+@app.route('/api/despesas', methods=['POST'])
+def post_despesas():
+    descricao = request.json.get('descricao')
+    valor = request.json.get('valor')
+
+    if descricao is None and valor is None:
+        return jsonify({
+            'Mensagem': MSG_NO_DATA
+        }), 204
+    elif descricao is None or valor is None:
+        return jsonify({
+            'Mensagem': MSG_EMPTY_FIELD
+        }), 204
+    else:
+        despesa = Despesas.query.filter_by(descricao=descricao).first()
+
+        if not despesa:
+            despesa = Despesas(
+                descricao=descricao, 
+                valor=valor
+            )
+
+            try:
+                db.session.add(despesa)
+                db.session.commit()
+            except:
+                db.session.rollback()
+
+        return jsonify(receita_schema.dump(despesa))
+
+
+@app.route('/api/despesas/<int:id>', methods=['GET'])
+def get_despesa(id):
+    despesa = Despesas.query.get_or_404(id)
+    if despesa:
+        return jsonify(receita_schema.dump(despesa))
+    else:
+        return jsonify({
+            'Mensagem': MSG_NOT_FOUND   
+        }), 404
+
+
+@app.route('/api/despesas/<int:id>', methods=['PUT'])
+def put_despesa(id):
+    despesa = Despesas.query.get_or_404(id)
+    if despesa:
+        descricao = request.json.get('descricao')
+        valor = request.json.get('valor')
+
+        if descricao is None and valor is None:
+            return jsonify({
+                'Mensagem': MSG_NO_DATA
+            }), 204
+        elif descricao is None or valor is None:
+            return jsonify({
+                'Mensagem': MSG_EMPTY_FIELD
+            }), 204
+        else:
+            try:
+                despesa.descricao = descricao
+                despesa.valor = valor
+                db.session.commit()
+            except:
+                db.session.rollback()
+
+            return jsonify(receita_schema.dump(despesa))
+    else:
+        return jsonify({
+            'Mensagem': MSG_NOT_FOUND   
+        }), 404
+
+
+@app.route('/api/despesas/<int:id>', methods=['DELETE'])
+def del_despesa(id):
+    despesa = Despesas.query.get_or_404(id)
+    if despesa:
+        try:
+            db.session.delete(despesa)
+            db.session.commit()
+        except:
+            db.session.rollback()
+        return jsonify(receita_schema.dump(despesa))
+    else:
+        return jsonify({
+            'Mensagem': MSG_NOT_FOUND   
+        }), 404
+
 
 if __name__ == '__main__':
     app.run(
