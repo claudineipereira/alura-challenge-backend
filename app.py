@@ -159,7 +159,7 @@ def del_receita(id):
 def get_despesas():
     todas_receitas = Despesas.query.all()
     if todas_receitas:
-        return jsonify(receitas_schema.dump(todas_receitas))
+        return jsonify(despesas_schema.dump(todas_receitas))
     else:
         return jsonify({
             'Mensagem': MSG_NOT_FOUND   
@@ -194,14 +194,14 @@ def post_despesas():
             except:
                 db.session.rollback()
 
-        return jsonify(receita_schema.dump(despesa))
+        return jsonify(despesa_schema.dump(despesa))
 
 
 @app.route('/api/despesas/<int:id>', methods=['GET'])
 def get_despesa(id):
     despesa = Despesas.query.get_or_404(id)
     if despesa:
-        return jsonify(receita_schema.dump(despesa))
+        return jsonify(despesa_schema.dump(despesa))
     else:
         return jsonify({
             'Mensagem': MSG_NOT_FOUND   
@@ -231,7 +231,7 @@ def put_despesa(id):
             except:
                 db.session.rollback()
 
-            return jsonify(receita_schema.dump(despesa))
+            return jsonify(despesa_schema.dump(despesa))
     else:
         return jsonify({
             'Mensagem': MSG_NOT_FOUND   
@@ -247,7 +247,7 @@ def del_despesa(id):
             db.session.commit()
         except:
             db.session.rollback()
-        return jsonify(receita_schema.dump(despesa))
+        return jsonify(despesa_schema.dump(despesa))
     else:
         return jsonify({
             'Mensagem': MSG_NOT_FOUND   
