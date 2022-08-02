@@ -99,7 +99,7 @@ def post_receitas():
 
 @app.route('/api/receitas/<int:id>', methods=['GET'])
 def get_receita(id):
-    receita = Receitas.query.get_or_404(id)
+    receita = Receitas.query.get(id)
     if receita:
         return jsonify(receita_schema.dump(receita))
     else:
@@ -110,7 +110,7 @@ def get_receita(id):
 
 @app.route('/api/receitas/<int:id>', methods=['PUT'])
 def put_receita(id):
-    receita = Receitas.query.get_or_404(id)
+    receita = Receitas.query.get(id)
     if receita:
         descricao = request.json.get('descricao')
         valor = request.json.get('valor')
@@ -140,7 +140,7 @@ def put_receita(id):
 
 @app.route('/api/receitas/<int:id>', methods=['DELETE'])
 def del_receita(id):
-    receita = Receitas.query.get_or_404(id)
+    receita = Receitas.query.get(id)
     if receita:
         try:
             db.session.delete(receita)
@@ -199,7 +199,7 @@ def post_despesas():
 
 @app.route('/api/despesas/<int:id>', methods=['GET'])
 def get_despesa(id):
-    despesa = Despesas.query.get_or_404(id)
+    despesa = Despesas.query.get(id)
     if despesa:
         return jsonify(despesa_schema.dump(despesa))
     else:
@@ -210,7 +210,7 @@ def get_despesa(id):
 
 @app.route('/api/despesas/<int:id>', methods=['PUT'])
 def put_despesa(id):
-    despesa = Despesas.query.get_or_404(id)
+    despesa = Despesas.query.get(id)
     if despesa:
         descricao = request.json.get('descricao')
         valor = request.json.get('valor')
@@ -240,7 +240,7 @@ def put_despesa(id):
 
 @app.route('/api/despesas/<int:id>', methods=['DELETE'])
 def del_despesa(id):
-    despesa = Despesas.query.get_or_404(id)
+    despesa = Despesas.query.get(id)
     if despesa:
         try:
             db.session.delete(despesa)
