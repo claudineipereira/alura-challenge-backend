@@ -1,10 +1,12 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
+from datetime import datetime
 
 MSG_NOT_FOUND = 'Não encontrado.'
 MSG_NO_DATA = 'Dados não informados'
 MSG_EMPTY_FIELD = 'Requisição incompleta'
+FORMATO_DATA = '%d/%m/%Y'
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///backend.db'
@@ -16,10 +18,9 @@ ma = Marshmallow(app)
 # Modelos de banco de dados
 class Receitas(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    descricao = db.Column(db.String(255), unique=True, nullable=False)
+    descricao = db.Column(db.String(255), nullable=False)
     valor = db.Column(db.Float, nullable=False)
-    data = db.Column(db.DateTime, server_default=db.func.current_timestamp(), 
-                        server_onupdate=db.func.current_timestamp(), nullable=False)
+    data = db.Column(db.DateTime, nullable=False)
 
     def __repr__(self):
         return f'<Receita {id}'
@@ -27,10 +28,9 @@ class Receitas(db.Model):
 
 class Despesas(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    descricao = db.Column(db.String(255), unique=True, nullable=False)
+    descricao = db.Column(db.String(255), nullable=False)
     valor = db.Column(db.Float, nullable=False)
-    data = db.Column(db.DateTime, server_default=db.func.current_timestamp(), 
-                        server_onupdate=db.func.current_timestamp(), nullable=False)
+    data = db.Column(db.DateTime, nullable=False)
 
     def __repr__(self):
         return f'<Despesa {id}'
@@ -63,38 +63,45 @@ def get_receitas():
     else:
         return jsonify({
             'Mensagem': MSG_NOT_FOUND   
-        })
+        }), 404
 
 
 @app.route('/api/receitas', methods=['POST'])
 def post_receitas():
     descricao = request.json.get('descricao')
     valor = request.json.get('valor')
+    data = request.json.get('data')
 
-    if descricao is None and valor is None:
+    if descricao is None and valor is None and data is None:
         return jsonify({
             'Mensagem': MSG_NO_DATA
-        }), 204
-    elif descricao is None or valor is None:
+        }), 204   
+
+    if descricao is None or valor is None or data is None:
         return jsonify({
             'Mensagem': MSG_EMPTY_FIELD
-        }), 204
-    else:
-        receita = Receitas.query.filter_by(descricao=descricao).first()
+        }), 204          
+    
+    data = datetime.strptime(data, FORMATO_DATA)
+    receita = Receitas.query.filter_by(
+        descricao=descricao,
+        data=data
+    ).first()
 
-        if not receita:
-            receita = Receitas(
-                descricao=descricao, 
-                valor=valor
-            )
+    if not receita:
+        receita = Receitas(
+            descricao=descricao, 
+            valor=valor,
+            data=data
+        )
 
-            try:
-                db.session.add(receita)
-                db.session.commit()
-            except:
-                db.session.rollback()
+        try:
+            db.session.add(receita)
+            db.session.commit()
+        except:
+            db.session.rollback()
 
-        return jsonify(receita_schema.dump(receita))
+    return jsonify(receita_schema.dump(receita))
 
 
 @app.route('/api/receitas/<int:id>', methods=['GET'])
@@ -153,105 +160,6 @@ def del_receita(id):
             'Mensagem': MSG_NOT_FOUND   
         }), 404
 
-
-# Rotas de despesas
-@app.route('/api/despesas', methods=['GET'])
-def get_despesas():
-    todas_receitas = Despesas.query.all()
-    if todas_receitas:
-        return jsonify(despesas_schema.dump(todas_receitas))
-    else:
-        return jsonify({
-            'Mensagem': MSG_NOT_FOUND   
-        })
-
-
-@app.route('/api/despesas', methods=['POST'])
-def post_despesas():
-    descricao = request.json.get('descricao')
-    valor = request.json.get('valor')
-
-    if descricao is None and valor is None:
-        return jsonify({
-            'Mensagem': MSG_NO_DATA
-        }), 204
-    elif descricao is None or valor is None:
-        return jsonify({
-            'Mensagem': MSG_EMPTY_FIELD
-        }), 204
-    else:
-        despesa = Despesas.query.filter_by(descricao=descricao).first()
-
-        if not despesa:
-            despesa = Despesas(
-                descricao=descricao, 
-                valor=valor
-            )
-
-            try:
-                db.session.add(despesa)
-                db.session.commit()
-            except:
-                db.session.rollback()
-
-        return jsonify(despesa_schema.dump(despesa))
-
-
-@app.route('/api/despesas/<int:id>', methods=['GET'])
-def get_despesa(id):
-    despesa = Despesas.query.get(id)
-    if despesa:
-        return jsonify(despesa_schema.dump(despesa))
-    else:
-        return jsonify({
-            'Mensagem': MSG_NOT_FOUND   
-        }), 404
-
-
-@app.route('/api/despesas/<int:id>', methods=['PUT'])
-def put_despesa(id):
-    despesa = Despesas.query.get(id)
-    if despesa:
-        descricao = request.json.get('descricao')
-        valor = request.json.get('valor')
-
-        if descricao is None and valor is None:
-            return jsonify({
-                'Mensagem': MSG_NO_DATA
-            }), 204
-        elif descricao is None or valor is None:
-            return jsonify({
-                'Mensagem': MSG_EMPTY_FIELD
-            }), 204
-        else:
-            try:
-                despesa.descricao = descricao
-                despesa.valor = valor
-                db.session.commit()
-            except:
-                db.session.rollback()
-
-            return jsonify(despesa_schema.dump(despesa))
-    else:
-        return jsonify({
-            'Mensagem': MSG_NOT_FOUND   
-        }), 404
-
-
-@app.route('/api/despesas/<int:id>', methods=['DELETE'])
-def del_despesa(id):
-    despesa = Despesas.query.get(id)
-    if despesa:
-        try:
-            db.session.delete(despesa)
-            db.session.commit()
-        except:
-            db.session.rollback()
-        return jsonify(despesa_schema.dump(despesa))
-    else:
-        return jsonify({
-            'Mensagem': MSG_NOT_FOUND   
-        }), 404
 
 
 if __name__ == '__main__':
