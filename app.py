@@ -61,6 +61,11 @@ despesa_schema = DespesasSchema()
 despesas_schema = DespesasSchema(many=True)
 
 
+# Cria banco de dados
+@app.before_first_request
+def cria_db():
+    db.create_all()
+
 # Rotas de receitas
 @app.route('/api/receitas', methods=['GET'])
 def get_receitas():
