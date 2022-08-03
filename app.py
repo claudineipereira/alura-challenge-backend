@@ -24,11 +24,8 @@ class Receitas(db.Model):
     valor = db.Column(db.Float, nullable=False)
     data = db.Column(db.Date, nullable=False)
 
-    def return_data(self):
-        return self.data
-
     def __repr__(self):
-        return f'<Receita {id}'
+        return f'<Receita {self.id}'
 
 
 class Despesas(db.Model):
