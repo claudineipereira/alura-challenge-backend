@@ -35,7 +35,7 @@ class Despesas(db.Model):
     data = db.Column(db.Date, nullable=False)
 
     def __repr__(self):
-        return f'<Despesa {id}'
+        return f'<Despesa {self.id}'
 
 
 # Esquemas da API
