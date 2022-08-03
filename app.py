@@ -1,14 +1,14 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import extract
 from flask_marshmallow import Marshmallow
 from datetime import datetime
 
-MSG_NOT_FOUND = 'Não encontrado.'
+MSG_NOT_FOUND = 'Não encontrado'
 MSG_NO_DATA = 'Dados não informados'
 MSG_EMPTY_FIELD = 'Requisição incompleta'
 FORMATO_DATA = '%d/%m/%Y'
-REGISTRO_EXISTE = 'Entrada já existe neste mês'
-MES = datetime.today().month
+REGISTRO_EXISTE = 'Entrada já existe neste mês e ano'
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///backend.db'
@@ -95,11 +95,14 @@ def post_receitas():
         datetime.strptime(data, FORMATO_DATA)
     )
 
-    receita = Receitas.query.filter_by(
-        descricao=descricao
+    receita = Receitas.query.filter(
+        descricao == descricao
+    ).filter(
+        extract('month', Receitas.data) == data.month,
+        extract('year', Receitas.data) == data.year
     ).first()
 
-    if receita and receita.data.month == MES:
+    if receita:
         return jsonify({
             'mensagem': REGISTRO_EXISTE
         })
@@ -109,13 +112,11 @@ def post_receitas():
             valor=valor,
             data=data
         )
-
         try:
             db.session.add(receita)
             db.session.commit()
         except:
             db.session.rollback()
-
     return jsonify(receita_schema.dump(receita))
 
 
@@ -150,14 +151,24 @@ def put_receita(id):
             data = datetime.date(
                 datetime.strptime(data, FORMATO_DATA)
             )
-            try:
-                receita.descricao = descricao
-                receita.valor = valor
-                receita.data = data
-                db.session.commit()
-            except:
-                db.session.rollback()
-
+            receitas = Receitas.query.filter(
+                    descricao == descricao
+                ).filter(
+                    extract('month', Receitas.data) == data.month,
+                    extract('year', Receitas.data) == data.year
+                ).first()
+            if receitas:
+                return jsonify({
+                    'mensagem': REGISTRO_EXISTE
+                })    
+            else:        
+                try:
+                    receita.descricao = descricao
+                    receita.valor = valor
+                    receita.data = data
+                    db.session.commit()
+                except:
+                    db.session.rollback()
             return jsonify(receita_schema.dump(receita))
     else:
         return jsonify({
@@ -213,11 +224,14 @@ def post_despesas():
         datetime.strptime(data, FORMATO_DATA)
     )
 
-    despesa = Despesas.query.filter_by(
-        descricao=descricao
+    despesa = Despesas.query.filter(
+        descricao == descricao
+    ).filter(
+        extract('month', Despesas.data) == data.month,
+        extract('year', Despesas.data) == data.year
     ).first()
 
-    if despesa and despesa.data.month == MES:
+    if despesa:
         return jsonify({
             'mensagem': REGISTRO_EXISTE
         })
@@ -227,13 +241,11 @@ def post_despesas():
             valor=valor,
             data=data
         )
-
         try:
             db.session.add(despesa)
             db.session.commit()
         except:
             db.session.rollback()
-
     return jsonify(despesa_schema.dump(despesa))
 
 
@@ -268,14 +280,24 @@ def put_despesa(id):
             data = datetime.date(
                 datetime.strptime(data, FORMATO_DATA)
             )
-            try:
-                despesa.descricao = descricao
-                despesa.valor = valor
-                despesa.data = data
-                db.session.commit()
-            except:
-                db.session.rollback()
-
+            despesas = Despesas.query.filter(
+                    descricao == descricao
+                ).filter(
+                    extract('month', Despesas.data) == data.month,
+                    extract('year', Despesas.data) == data.year
+                ).first()
+            if despesas:
+                return jsonify({
+                    'mensagem': REGISTRO_EXISTE
+                })    
+            else:        
+                try:
+                    despesa.descricao = descricao
+                    despesa.valor = valor
+                    despesa.data = data
+                    db.session.commit()
+                except:
+                    db.session.rollback()
             return jsonify(despesa_schema.dump(despesa))
     else:
         return jsonify({
@@ -297,6 +319,7 @@ def del_despesa(id):
         return jsonify({
             'Mensagem': MSG_NOT_FOUND   
         }), 404
+
 
 if __name__ == '__main__':
     app.run(
