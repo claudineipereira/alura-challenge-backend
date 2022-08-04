@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import extract
+from sqlalchemy import extract, func
 from flask_marshmallow import Marshmallow
 from datetime import datetime
 
@@ -96,7 +96,7 @@ def post_receitas():
     )
 
     receita = Receitas.query.filter(
-        descricao == descricao
+        func.lower(Receitas.descricao) == descricao.lower()
     ).filter(
         extract('month', Receitas.data) == data.month,
         extract('year', Receitas.data) == data.year
@@ -151,25 +151,14 @@ def put_receita(id):
             data = datetime.date(
                 datetime.strptime(data, FORMATO_DATA)
             )
-            receitas = Receitas.query.filter(
-                    descricao == descricao
-                ).filter(
-                    extract('month', Receitas.data) == data.month,
-                    extract('year', Receitas.data) == data.year
-                ).first()
-            if receitas:
-                return jsonify({
-                    'mensagem': REGISTRO_EXISTE
-                })    
-            else:        
-                try:
-                    receita.descricao = descricao
-                    receita.valor = valor
-                    receita.data = data
-                    db.session.commit()
-                except:
-                    db.session.rollback()
-            return jsonify(receita_schema.dump(receita))
+            try:
+                receita.descricao = descricao
+                receita.valor = valor
+                receita.data = data
+                db.session.commit()
+            except:
+                db.session.rollback()
+        return jsonify(receita_schema.dump(receita))
     else:
         return jsonify({
             'Mensagem': MSG_NOT_FOUND   
@@ -225,7 +214,7 @@ def post_despesas():
     )
 
     despesa = Despesas.query.filter(
-        descricao == descricao
+        func.lower(Despesas.descricao) == descricao.lower()
     ).filter(
         extract('month', Despesas.data) == data.month,
         extract('year', Despesas.data) == data.year
@@ -280,25 +269,14 @@ def put_despesa(id):
             data = datetime.date(
                 datetime.strptime(data, FORMATO_DATA)
             )
-            despesas = Despesas.query.filter(
-                    descricao == descricao
-                ).filter(
-                    extract('month', Despesas.data) == data.month,
-                    extract('year', Despesas.data) == data.year
-                ).first()
-            if despesas:
-                return jsonify({
-                    'mensagem': REGISTRO_EXISTE
-                })    
-            else:        
-                try:
-                    despesa.descricao = descricao
-                    despesa.valor = valor
-                    despesa.data = data
-                    db.session.commit()
-                except:
-                    db.session.rollback()
-            return jsonify(despesa_schema.dump(despesa))
+            try:
+                despesa.descricao = descricao
+                despesa.valor = valor
+                despesa.data = data
+                db.session.commit()
+            except:
+                db.session.rollback()
+        return jsonify(despesa_schema.dump(despesa))
     else:
         return jsonify({
             'Mensagem': MSG_NOT_FOUND   
