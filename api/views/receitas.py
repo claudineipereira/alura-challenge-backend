@@ -1,10 +1,9 @@
 from api import app, db
-from flask import jsonify, request
+from flask import Blueprint, jsonify, request
 from sqlalchemy import extract, func
-from api.schemas.receitas import receitas_schema, receita_schema
-from api.models.receitas import Receitas
+from api.models import Receitas
+from api.schemas import receitas_schema, receita_schema
 from datetime import datetime
-
 
 MSG_NOT_FOUND = app.config.get('MSG_NOT_FOUND')
 MSG_NO_DATA = app.config.get('MSG_NO_DATA')
@@ -12,8 +11,10 @@ MSG_EMPTY_FIELD = app.config.get('MSG_EMPTY_FIELD')
 FORMATO_DATA = app.config.get('FORMATO_DATA')
 REGISTRO_EXISTE = app.config.get('REGISTRO_EXISTE')
 
+receitas_api = Blueprint('receitas_api', __name__)
 
-@app.route('/api/receitas', methods=['GET'])
+
+@receitas_api.route('/api/receitas', methods=['GET'])
 def get_receitas():
     todas_receitas = Receitas.query.all()
     if todas_receitas:
@@ -24,7 +25,7 @@ def get_receitas():
         }), 404
 
 
-@app.route('/api/receitas', methods=['POST'])
+@receitas_api.route('/api/receitas', methods=['POST'])
 def post_receitas():
     descricao = request.json.get('descricao')
     valor = request.json.get('valor')
@@ -69,7 +70,7 @@ def post_receitas():
     return jsonify(receita_schema.dump(receita))
 
 
-@app.route('/api/receitas/<int:id>', methods=['GET'])
+@receitas_api.route('/api/receitas/<int:id>', methods=['GET'])
 def get_receita(id):
     receita = Receitas.query.get(id)
     if receita:
@@ -80,7 +81,7 @@ def get_receita(id):
         }), 404
 
 
-@app.route('/api/receitas/<int:id>', methods=['PUT'])
+@receitas_api.route('/api/receitas/<int:id>', methods=['PUT'])
 def put_receita(id):
     receita = Receitas.query.get(id)
     if receita:
@@ -114,7 +115,7 @@ def put_receita(id):
         }), 404
 
 
-@app.route('/api/receitas/<int:id>', methods=['DELETE'])
+@receitas_api.route('/api/receitas/<int:id>', methods=['DELETE'])
 def del_receita(id):
     receita = Receitas.query.get(id)
     if receita:
