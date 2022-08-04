@@ -14,7 +14,7 @@ REGISTRO_EXISTE = app.config.get('REGISTRO_EXISTE')
 despesas_api = Blueprint('despesas_api', __name__)
 
 
-@despesas_api.route('/api/despesas', methods=['GET'])
+@despesas_api.route('/despesas', methods=['GET'])
 def get_despesas():
     todas_despesas = Despesas.query.all()
     if todas_despesas:
@@ -25,7 +25,7 @@ def get_despesas():
         }), 404
 
 
-@despesas_api.route('/api/despesas', methods=['POST'])
+@despesas_api.route('/despesas', methods=['POST'])
 def post_despesas():
     descricao = request.json.get('descricao')
     valor = request.json.get('valor')
@@ -70,7 +70,7 @@ def post_despesas():
     return jsonify(despesa_schema.dump(despesa))
 
 
-@despesas_api.route('/api/despesas/<int:id>', methods=['GET'])
+@despesas_api.route('/despesas/<int:id>', methods=['GET'])
 def get_despesa(id):
     despesa = Despesas.query.get(id)
     if despesa:
@@ -81,7 +81,7 @@ def get_despesa(id):
         }), 404
 
 
-@despesas_api.route('/api/despesas/<int:id>', methods=['PUT'])
+@despesas_api.route('/despesas/<int:id>', methods=['PUT'])
 def put_despesa(id):
     despesa = Despesas.query.get(id)
     if despesa:
@@ -115,7 +115,7 @@ def put_despesa(id):
         }), 404
 
 
-@despesas_api.route('/api/despesas/<int:id>', methods=['DELETE'])
+@despesas_api.route('/despesas/<int:id>', methods=['DELETE'])
 def del_despesa(id):
     despesa = Despesas.query.get(id)
     if despesa:

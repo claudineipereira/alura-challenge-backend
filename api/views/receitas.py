@@ -14,7 +14,7 @@ REGISTRO_EXISTE = app.config.get('REGISTRO_EXISTE')
 receitas_api = Blueprint('receitas_api', __name__)
 
 
-@receitas_api.route('/api/receitas', methods=['GET'])
+@receitas_api.route('/receitas', methods=['GET'])
 def get_receitas():
     todas_receitas = Receitas.query.all()
     if todas_receitas:
@@ -25,7 +25,7 @@ def get_receitas():
         }), 404
 
 
-@receitas_api.route('/api/receitas', methods=['POST'])
+@receitas_api.route('/receitas', methods=['POST'])
 def post_receitas():
     descricao = request.json.get('descricao')
     valor = request.json.get('valor')
@@ -70,7 +70,7 @@ def post_receitas():
     return jsonify(receita_schema.dump(receita))
 
 
-@receitas_api.route('/api/receitas/<int:id>', methods=['GET'])
+@receitas_api.route('/receitas/<int:id>', methods=['GET'])
 def get_receita(id):
     receita = Receitas.query.get(id)
     if receita:
@@ -81,7 +81,7 @@ def get_receita(id):
         }), 404
 
 
-@receitas_api.route('/api/receitas/<int:id>', methods=['PUT'])
+@receitas_api.route('/receitas/<int:id>', methods=['PUT'])
 def put_receita(id):
     receita = Receitas.query.get(id)
     if receita:
@@ -115,7 +115,7 @@ def put_receita(id):
         }), 404
 
 
-@receitas_api.route('/api/receitas/<int:id>', methods=['DELETE'])
+@receitas_api.route('/receitas/<int:id>', methods=['DELETE'])
 def del_receita(id):
     receita = Receitas.query.get(id)
     if receita:
